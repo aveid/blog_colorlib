@@ -1,8 +1,8 @@
 from rest_framework import generics
 
-from blog.models import Blog
+from blog.models import Blog, Category
 from blog.permissions import IsAuthorOrReadOnly
-from blog.serializers import BlogSerializer
+from blog.serializers import BlogSerializer, CategorySerializer
 
 
 class BlogListCreateAPIView(generics.ListCreateAPIView):
@@ -18,3 +18,9 @@ class BlogUpdateDeleteGetAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
     permission_classes = [IsAuthorOrReadOnly, ]
+
+
+class CategoryListAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthorOrReadOnly, ]
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
