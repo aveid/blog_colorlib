@@ -20,3 +20,9 @@ class Blog(models.Model):
 class Image(models.Model):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="blog")
+
+
+class Tag(models.Model):
+    title = models.CharField(max_length=50)
+    desc = models.TextField()
+    blog = models.ManyToManyField(Blog, related_name="tags")

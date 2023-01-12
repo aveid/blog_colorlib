@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from accounts.send_mail import send_message_to_email
 
@@ -63,3 +64,20 @@ class LoginTokenSerializer(serializers.Serializer):
             "token": token
         }
 
+
+class JWTLoginSerializer(TokenObtainPairSerializer):
+    email = serializers.CharField(max_length=100, write_only=True)
+    password = serializers.CharField(max_length=100, write_only=True)
+
+    def validate(self, attrs):
+        user = authenticate(email=attrs.pop("email"), password=attrs.pop("password"))
+        if not user:
+            raise serializers.ValidationError({
+                "error": "such user doesn't exist!!!"
+            })
+        if user and user.is_active:
+            refresh = self.get_token(user)
+            attrs["refresh"] = str(refresh)
+            attrs["access"] = str(refresh.access_token)
+
+        return attrs
