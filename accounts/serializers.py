@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from accounts.send_mail import send_message_to_email
+from accounts.tasks import send_message
 
 User = get_user_model()
 
@@ -35,7 +36,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data, password=password)
         user.is_active = False
         user.save()
-        send_message_to_email(user)
+        send_message.delay(user.email, user.activation_code)
         return user
 
 

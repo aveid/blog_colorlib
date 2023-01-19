@@ -6,7 +6,8 @@ User = get_user_model()
 
 class Category(models.Model):
     title = models.CharField(max_length=255)
-
+    date = models.DateField(null=True)
+    price = models.PositiveIntegerField(null=True)
 
 class Blog(models.Model):
     title = models.CharField(max_length=255)
