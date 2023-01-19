@@ -1,38 +1,44 @@
-version: '3.9'
-
+version: '3.8'
 services:
-  app:
-    build:
-      context: .
+  web:
+    container_name: blog
+    build: .
+    command:  >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000
+             "
+    volumes:
+      - .:/app
     ports:
-      - "8000:8000"
-    command: >
-      sh -c "python3 manage.py migrate &&
-             python3 manage.py runserver 0.0.0.0:8000"
-
+      - 8000:8000
     env_file:
       - .env
     depends_on:
-      - db_test
-  db_test:
-    image: postgres:14-alpine
+      - db
+      - redis
+  db:
+    container_name: db
+    image: postgres:14.2-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-  redis:
-    image: redis:alpine
 
   celery:
-    restart: always
-    build:
-      context: .
-    command: celery -A main worker -l info
-    env_file:
-      - .env
+    build: .
+    command: celery -A main worker -l INFO
+    volumes:
+      - .:/app
     depends_on:
-      - db_test
       - redis
-      - app
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+
 volumes:
-  pgdata:
+  postgres_data:
+    driver: local
